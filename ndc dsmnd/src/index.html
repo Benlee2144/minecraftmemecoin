@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ultimate Minecraft Meme Coin Launch</title>
+  <!-- Retro Pixelated Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    /* Global Reset & Base Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Press Start 2P', cursive;
+      background: #7ec850;
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* Canvas Layers for Particle & Effects Animations */
+    #particle-canvas, #effects-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    #particle-canvas { z-index: -3; }
+    #effects-canvas { z-index: -2; }
+
+    /* Navigation Bar */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.8);
+      padding: 10px 0;
+      z-index: 1000;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+    }
+    nav ul li { cursor: pointer; transition: transform 0.3s; }
+    nav ul li:hover { transform: scale(1.1); }
+
+    /* Hero Section */
+    #hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background: url('minecraft_background.jpg') no-repeat center center/cover;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding-top: 60px;
+    }
+    #hero h1 {
+      font-size: 3em;
+      text-shadow: 4px 4px #000;
+      margin-bottom: 20px;
+    }
+    #hero p {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px #000;
+    }
+    /* Countdown Timer */
+    #countdown {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      background: rgba(0,0,0,0.6);
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-shadow: 1px 1px #000;
+    }
+    .cta-button {
+      padding: 15px 30px;
+      background: #ffae00;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: transform 0.3s, background 0.3s;
+    }
+    .cta-button:hover {
+      transform: scale(1.1);
+      background: #e69900;
+    }
+
+    /* Animated Characters (Steve, Alex, Creeper, Zombie, Skeleton) */
+    .character {
+      position: absolute;
+      bottom: 0;
+      width: 128px;
+      height: 128px;
+      background-size: cover;
+    }
+    .steve { background-image: url('steve.png'); left: -150px; animation: slideIn 10s linear infinite; }
+    @keyframes slideIn {
+      0% { left: -150px; }
+      40% { left: calc(50% - 64px); }
+      60% { left: calc(50% - 64px); }
+      100% { left: 110%; }
+    }
+    .alex { background-image: url('alex.png'); left: 110%; animation: slideInReverse 12s linear infinite; }
+    @keyframes slideInReverse {
+      0% { left: 110%; }
+      40% { left: calc(50% - 64px); }
+      60% { left: calc(50% - 64px); }
+      100% { left: -150px; }
+    }
+    .creeper { background-image: url('creeper.png'); left: 10%; animation: bounce 4s ease-in-out infinite; }
+    @keyframes bounce {
+      0%, 100% { bottom: 0; }
+      50% { bottom: 50px; }
+    }
+    .zombie { background-image: url('zombie.png'); right: 10%; animation: floatSide 8s linear infinite; }
+    @keyframes floatSide {
+      0% { right: 10%; }
+      50% { right: 50%; }
+      100% { right: 10%; }
+    }
+    .skeleton { background-image: url('skeleton.png'); left: 40%; animation: rock 5s ease-in-out infinite; }
+    @keyframes rock {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(10deg); }
+    }
+    .coin {
+      position: absolute;
+      top: 50%;
+      right: 50px;
+      width: 100px;
+      height: 100px;
+      margin-top: -50px;
+      background: radial-gradient(circle, #ffd700, #ff8c00);
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      animation: spin 4s linear infinite;
+      z-index: 10;
+    }
+    @keyframes spin {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+
+    /* Roadmap Section (Market Cap & Addon Utility) */
+    #roadmap {
+      background: #2d2d2d;
+      padding: 80px 20px;
+    }
+    #roadmap h2 {
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 40px;
+      text-shadow: 2px 2px #000;
+    }
+    .timeline {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      padding: 20px 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 4px;
+      height: 100%;
+      background: #ffae00;
+      transform: translateX(-50%);
+    }
+    .timeline-item {
+      position: relative;
+      width: 45%;
+      padding: 20px;
+      background: #444;
+      border-radius: 8px;
+      margin-bottom: 40px;
+      z-index: 0;
+    }
+    /* FIRE BORDER AROUND ROADMAP BOXES */
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      background: url('fire.png') repeat;
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: -1;
+      animation: flicker 1s infinite;
+    }
+    @keyframes flicker {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; }
+      100% { opacity: 0.7; }
+    }
+    .timeline-item h3 { margin-bottom: 10px; font-size: 1.5em; }
+    .timeline-item p { font-size: 1em; line-height: 1.4; }
+    .timeline-item.left { left: 0; transform: translateX(-20px); }
+    .timeline-item.right { left: 55%; transform: translateX(20px); }
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      top: 20px;
+      width: 20px;
+      height: 20px;
+      background: #ffae00;
+      border: 4px solid #fff;
+      border-radius: 50%;
+      z-index: 1;
+    }
+    .timeline-item.left::after { right: -10px; }
+    .timeline-item.right::after { left: -10px; }
+
+    /* Team Section */
+    #team {
+      background: #7ec850;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    #team h2 {
+      font-size: 2.5em;
+      margin-bottom: 40px;
+      text-shadow: 2px 2px #000;
+    }
+    .team-members {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+    .member {
+      background: #444;
+      padding: 20px;
+      border-radius: 8px;
+      width: 200px;
+      text-align: center;
+    }
+    .member img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .member h3 { font-size: 1.2em; margin-bottom: 5px; }
+    .member p { font-size: 0.9em; }
+
+    /* Epic Block Party Section */
+    #blockparty {
+      background: url('minecraft_blocks.jpg') repeat;
+      padding: 80px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #blockparty h2 {
+      font-size: 2.8em;
+      margin-bottom: 40px;
+      text-shadow: 3px 3px #000;
+    }
+    /* Explosion Button */
+    #explosionButton {
+      display: inline-block;
+      margin: 20px auto;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background: #ff0000;
+      border: 3px solid #fff;
+      border-radius: 10px;
+      cursor: pointer;
+      text-shadow: 2px 2px #000;
+      transition: transform 0.3s;
+      z-index: 10;
+      position: relative;
+    }
+    #explosionButton:hover { transform: scale(1.1); }
+    /* Crater effect (big hole in the ground) */
+    #crater {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      width: 300px;
+      height: 150px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, #333 100%);
+      border-radius: 50%;
+      z-index: 5;
+      opacity: 0;
+    }
+    @keyframes craterAnim {
+      0% { transform: translateX(-50%) scale(0); opacity: 0; }
+      50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+      100% { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+    /* Fire overlay effect – replace 'fire.png' with your flame image */
+    #fire {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 200px;
+      background: url('fire.png') no-repeat center center;
+      background-size: cover;
+      opacity: 0;
+      z-index: 6;
+    }
+    @keyframes fireAnim {
+      0% { opacity: 0; }
+      40% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    /* Flying Blocks from the crater */
+    .flying-block {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: url('tnt.png') no-repeat center center/cover;
+      pointer-events: none;
+      z-index: 7;
+      animation: flyAway 1.5s forwards;
+    }
+    @keyframes flyAway {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0.5); opacity: 0; }
+    }
+    /* Confetti Effect */
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: red;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 8;
+      animation: confettiFly 2s forwards;
+    }
+    @keyframes confettiFly {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--cx), var(--cy)) scale(0.5); opacity: 0; }
+    }
+
+    /* Contact Section */
+    #contact {
+      background: #444;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    #contact h2 { font-size: 2.5em; margin-bottom: 20px; }
+    #contact p { font-size: 1em; margin-bottom: 10px; }
+
+    /* Footer */
+    footer {
+      background: #2d2d2d;
+      padding: 20px;
+      text-align: center;
+      font-size: 0.8em;
+      text-shadow: 1px 1px #000;
+    }
+    @media (max-width: 768px) {
+      .timeline-item { width: 90%; }
+      .timeline::before { left: 5%; }
+      .timeline-item.left, .timeline-item.right { left: 5%; transform: none; }
+      .team-members { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Main Theme Music -->
+  <audio id="themeMusic" src="minecraft_theme.mp3" autoplay loop></audio>
+
+  <!-- Canvas Layers for Particle and Effects Animations -->
+  <canvas id="particle-canvas"></canvas>
+  <canvas id="effects-canvas"></canvas>
+
+  <!-- Navigation -->
+  <nav>
+    <ul>
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#blockparty">Epic Block Party</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <h1>Ultimate Minecraft Meme Coin Launch</h1>
+    <p>Join the Blocky Revolution and Blast Off to the Moon!</p>
+    <div id="countdown"></div>
+    <!-- "Join Now" button now directs to your Telegram bot -->
+    <button class="cta-button" onclick="window.location.href='https://t.me/+NSgz7WZ90WM2Y2Ix';">
+      Join Now
+    </button>
+    <!-- Animated Characters -->
+    <div class="character steve"></div>
+    <div class="coin"></div>
+    <div class="character alex"></div>
+    <div class="character creeper" style="left: 20%;"></div>
+    <div class="character zombie" style="right: 20%;"></div>
+    <div class="character skeleton" style="left: 40%;"></div>
+  </section>
+
+  <!-- Roadmap Section -->
+  <section id="roadmap">
+    <h2>Roadmap</h2>
+    <div class="timeline">
+      <div class="timeline-item left">
+        <h3>Phase 1: Block Foundations</h3>
+        <p>
+          Build our community and hit a market cap of <strong>$1M</strong>—unlocking exclusive Minecraft addons and in-game items.
+        </p>
+      </div>
+      <div class="timeline-item right">
+        <h3>Phase 2: Pixel Expansion</h3>
+        <p>
+          Grow to a <strong>$10M</strong> market cap as we integrate with popular Minecraft mods and launch our addon marketplace.
+        </p>
+      </div>
+      <div class="timeline-item left">
+        <h3>Phase 3: Redstone Revolution</h3>
+        <p>
+          Reach a <strong>$100M</strong> market cap with advanced transaction features, redstone-powered experiences, and custom content.
+        </p>
+      </div>
+      <div class="timeline-item right">
+        <h3>Phase 4: Global Blockbuster</h3>
+        <p>
+          Achieve a <strong>$1B</strong> market cap and establish our coin as the official currency for Minecraft—empowering players worldwide.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section id="team">
+    <h2>Meet the Team</h2>
+    <div class="team-members">
+      <div class="member">
+        <img src="steve.png" alt="Steve" />
+        <h3>Steve</h3>
+        <p>The fearless leader ready to dig into the future!</p>
+      </div>
+      <div class="member">
+        <img src="alex.png" alt="Alex" />
+        <h3>Alex</h3>
+        <p>The creative mastermind behind our epic builds.</p>
+      </div>
+      <div class="member">
+        <img src="creeper.png" alt="Creeper" />
+        <h3>Creeper</h3>
+        <p>The explosive force that ignites our revolution.</p>
+      </div>
+      <div class="member">
+        <img src="zombie.png" alt="Zombie" />
+        <h3>Zombie</h3>
+        <p>The relentless enforcer of our blocky uprising.</p>
+      </div>
+      <div class="member">
+        <img src="skeleton.png" alt="Skeleton" />
+        <h3>Skeleton</h3>
+        <p>The sharpshooter keeping our vision on target.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Epic Block Party Section -->
+  <section id="blockparty">
+    <h2>Epic Block Party: The Ultimate Minecraft Festival</h2>
+    <!-- Explosion Button -->
+    <div id="explosionButton" onclick="triggerExplosion()">Blast It!</div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <h2>Contact Us</h2>
+    <p>Have questions or want to join the madness? Hop onto our Discord or follow us on social media!</p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Ultimate Minecraft Meme Coin. Not affiliated with Mojang or Microsoft. All rights reserved.</p>
+  </footer>
+
+  <!-- Optional Explosion Sound -->
+  <audio id="explosionSound" src="explosion.mp3"></audio>
+
+  <!-- JavaScript -->
+  <script>
+    /* ------------------------------
+       Countdown Timer
+    ------------------------------ */
+    const launchDate = new Date("2025-02-15T00:00:00").getTime();
+    const countdownElement = document.getElementById("countdown");
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = launchDate - now;
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      countdownElement.innerHTML = `Launch in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+      if (distance < 0) {
+        clearInterval(countdownInterval);
+        countdownElement.innerHTML = "Launched!";
+      }
+    }
+    const countdownInterval = setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    /* ------------------------------
+       Particle Background Animation
+    ------------------------------ */
+    const particleCanvas = document.getElementById('particle-canvas');
+    const pctx = particleCanvas.getContext('2d');
+    particleCanvas.width = window.innerWidth;
+    particleCanvas.height = window.innerHeight;
+    let particlesArray = [];
+    const particleColors = ['#7ec850', '#a0d468', '#8cc152', '#3baFDA'];
+    window.addEventListener('resize', () => {
+      particleCanvas.width = window.innerWidth;
+      particleCanvas.height = window.innerHeight;
+      initParticles();
+    });
+    class Particle {
+      constructor() {
+        this.x = Math.random() * particleCanvas.width;
+        this.y = Math.random() * particleCanvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = (Math.random() * 2) - 1;
+        this.speedY = (Math.random() * 2) - 1;
+        this.color = particleColors[Math.floor(Math.random() * particleColors.length)];
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > particleCanvas.width) this.speedX = -this.speedX;
+        if (this.y < 0 || this.y > particleCanvas.height) this.speedY = -this.speedY;
+      }
+      draw() {
+        pctx.fillStyle = this.color;
+        pctx.beginPath();
+        pctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        pctx.fill();
+      }
+    }
+    function initParticles() {
+      particlesArray = [];
+      const numberOfParticles = Math.floor((particleCanvas.width * particleCanvas.height) / 9000);
+      for (let i = 0; i < numberOfParticles; i++) {
+        particlesArray.push(new Particle());
+      }
+    }
+    initParticles();
+    function animateParticles() {
+      pctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+      particlesArray.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    /* ------------------------------
+       Explosion Effect Trigger Function
+    ------------------------------ */
+    function triggerExplosion() {
+      const blockparty = document.getElementById('blockparty');
+
+      // Play explosion sound (if available)
+      const explosionSound = document.getElementById("explosionSound");
+      if (explosionSound) explosionSound.play();
+
+      // Create and animate crater (big hole in the ground)
+      const crater = document.createElement('div');
+      crater.id = 'crater';
+      blockparty.appendChild(crater);
+      crater.style.animation = 'craterAnim 2s forwards';
+
+      // Create and animate fire overlay
+      const fire = document.createElement('div');
+      fire.id = 'fire';
+      blockparty.appendChild(fire);
+      fire.style.animation = 'fireAnim 2s forwards';
+
+      // Create several flying blocks from the crater center
+      for (let i = 0; i < 12; i++) {
+        const block = document.createElement('div');
+        block.className = 'flying-block';
+        const dx = (Math.random() * 800 - 400) + 'px';
+        const dy = (Math.random() * -400 - 100) + 'px';
+        block.style.setProperty('--dx', dx);
+        block.style.setProperty('--dy', dy);
+        block.style.left = '50%';
+        block.style.bottom = '0';
+        blockparty.appendChild(block);
+        setTimeout(() => block.remove(), 1500);
+      }
+      
+      // Spawn confetti for extra epicness
+      spawnConfetti(30, blockparty);
+
+      // Remove crater and fire elements after explosion
+      setTimeout(() => {
+        crater.remove();
+        fire.remove();
+      }, 2500);
+    }
+
+    /* ------------------------------
+       Confetti Effect Function
+    ------------------------------ */
+    function spawnConfetti(amount, container) {
+      for (let i = 0; i < amount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        const cx = (Math.random() * 800 - 400) + 'px';
+        const cy = (Math.random() * -600 - 100) + 'px';
+        confetti.style.setProperty('--cx', cx);
+        confetti.style.setProperty('--cy', cy);
+        confetti.style.left = '50%';
+        confetti.style.top = '50%';
+        const colors = ['#ff0000', '#ffae00', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff'];
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        container.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 2000);
+      }
+    }
+  </script>
+</body>
+</html>
